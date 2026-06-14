@@ -1,0 +1,36 @@
+name: Build WiiMC-SS
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: devkitpro/devkitppc:latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        dkp-pacman -Syu --noconfirm
+        dkp-pacman -S --noconfirm wii-dev
+
+    - name: Compile GameCube/Wii binary
+      run: |
+        make clean
+        make
+
+    - name: Upload boot.dol
+      uses: actions/upload-artifact@v4
+      with:
+        name: WiiMC-SS-Custom-CH
+        path: |
+          *.dol
+          *.elf
